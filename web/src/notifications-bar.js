@@ -1,8 +1,6 @@
-(() => {
+const template = document.createElement('template');
 
-  const template = document.createElement('template');
-
-  template.innerHTML = `
+template.innerHTML = `
   <style>
     div {
       padding: 20px;
@@ -25,7 +23,7 @@
   <div></div>
 `;
 
-class NotificationsBar extends HTMLElement {
+export default class NotificationsBar extends HTMLElement {
   constructor() {
     super();
     this._shadowRoot = this.attachShadow({ 'mode': 'open' });
@@ -61,5 +59,3 @@ class NotificationsBar extends HTMLElement {
   }
 }
 
-  customElements.define('notifications-bar', NotificationsBar);
-})();

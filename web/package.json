@@ -1,0 +1,16 @@
+{
+  "name": "vigrid-servers",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node dev-server.js"
+  },
+  "author": "John Hobbs",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.20.2",
+    "esbuild-server": "^0.3.0",
+    "nchan": "^1.0.10"
+  }
+}
