@@ -27,6 +27,7 @@ func main() {
 		password           *string        = fs.String("password", "", "HTTP basic auth password for the publish endpoint")
 		verbose            *bool          = fs.Bool("verbose", false, "Enable verbose logging")
 		publishWorkerCount *int           = fs.Int("publish-workers", 10, "Number of workers to publish updates")
+		heartbeat          *time.Duration = fs.Duration("heartbeat", time.Minute, "Websocket heartbeat interval")
 		_                                 = fs.String("config", "", "config file (optional)")
 	)
 
@@ -72,6 +73,19 @@ func main() {
 		wg.Add(1)
 		go updatePublishWorker(&wg, updateMessages, *publishEndpoint, *username, *password)
 	}
+
+	go func() {
+		heartbeat := time.NewTicker(*heartbeat)
+		for {
+			select {
+			case <-heartbeat.C:
+				updateMessages <- UpdateMessage{
+					ID:      "heartbeat",
+					Updated: time.Now().UnixMilli(),
+				}
+			}
+		}
+	}()
 
 	// Begin polling the service and issue updates
 	log.Info().Msg("Starting polling of server state")
