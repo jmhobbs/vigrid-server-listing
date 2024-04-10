@@ -26,6 +26,39 @@
     .server-list tr :first-child {
         cursor: pointer;
     }
+    table {
+      border-collapse: collapse;
+    }
+    td, th {
+      padding: 0.5em 1em;
+    }
+    th {
+      background: black;
+      color: white;
+      text-align: left;
+    }
+    tbody tr :first-child, tbody tr :nth-child(2) {
+      text-align: center;
+    }
+    tbody tr :nth-child(5) {
+     text-align: right;
+     padding-right: 0;
+    }
+    tbody tr :nth-child(6) {
+      padding-left: 0;
+    }
+    tr.open {
+      background-color: lightgreen;
+      }
+    tr.locked {
+      background-color: lightcoral;
+      }
+    tr.offline {
+      background-color: gray;
+    }
+    tr.full {
+      background-color: lightgoldenrodyellow;
+      }
   </style>
   <table class="server-list">
     <thead>
@@ -34,7 +67,7 @@
         <th>Status</th>
         <th>Region</th>
         <th>Name</th>
-        <th>Players</th>
+        <th colspan="2">Players</th>
         <th>Uptime</th>
       </tr>
     </thead>
@@ -51,7 +84,7 @@
 
     render(state) {
       this._tbody.innerHTML = '';
-      
+
       if(!state) {
         const row = document.createElement('tr');
         const loading = document.createElement('td');
@@ -69,7 +102,10 @@
         const name = document.createElement('td');
         const region = document.createElement('td');
         const players = document.createElement('td');
+        const maxPlayers = document.createElement('td');
         const uptime = document.createElement('td');
+
+        row.className = state[serverId].state;
 
         if(state[serverId].notifications) {
           watch.innerText = '🔔';
@@ -86,6 +122,7 @@
         name.innerText = state[serverId].name;
         region.innerText = state[serverId].region;
         players.innerText = state[serverId].players;
+        maxPlayers.innerText = `/${state[serverId].max_players}`;
         uptime.innerText = state[serverId].uptime;
 
         row.appendChild(watch);
@@ -93,6 +130,7 @@
         row.appendChild(region);
         row.appendChild(name);
         row.appendChild(players);
+        row.appendChild(maxPlayers);
         row.appendChild(uptime);
 
         this._tbody.appendChild(row);
