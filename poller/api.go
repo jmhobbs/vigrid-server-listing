@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
+
+	"github.com/rs/zerolog/log"
 )
 
 type apiResponse struct {
@@ -40,7 +41,7 @@ func getCurrentState(ctx context.Context, endpoint string) (map[string]Server, e
 	for _, server := range apiResp.Servers {
 		region, name, err := parseServerName(server[1].(string))
 		if err != nil {
-			log.Printf("Error parsing server name: %v", err)
+			log.Warn().Str("name", server[1].(string)).Msg("Error parsing server name")
 			name = server[1].(string)
 			region = ""
 		}

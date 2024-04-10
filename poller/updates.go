@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
 	"time"
+
+	"github.com/rs/zerolog/log"
 )
 
 // State change update message sent over websocket
@@ -22,7 +23,7 @@ func diffServers(oldState, newState map[string]Server) []UpdateMessage {
 	for id, server := range oldState {
 		newServer, ok := newState[id]
 		if !ok {
-			log.Printf("Server %s not in new state", id)
+			log.Warn().Str("server_id", id).Msg("Server not in new state")
 		} else {
 			if server.State != newServer.State || server.Players != newServer.Players || server.Uptime != newServer.Uptime {
 				msg := UpdateMessage{ID: id, Updated: now}
