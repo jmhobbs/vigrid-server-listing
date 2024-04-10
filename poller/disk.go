@@ -26,8 +26,12 @@ func writeStateToFile(state map[string]Server, path string) error {
 		os.Remove(f.Name())
 		return err
 	}
-
 	f.Close()
+
+	if err := os.Chmod(f.Name(), 0444); err != nil {
+		os.Remove(f.Name())
+		return err
+	}
 
 	err = os.Rename(f.Name(), path)
 	if err != nil {
