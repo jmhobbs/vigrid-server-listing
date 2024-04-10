@@ -1,18 +1,20 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-      <title>Server List Demo</title>
+      <title>VIGRID Servers</title>
       <script src="notifications-bar.js"></script>
       <script src="server-list.js"></script>
       <script src="monitor.js"></script>
   </head>
   <body>
     <notifications-bar></notifications-bar>
+    <p>Click the bell 	🔕 → 🔔 to receive notifications when a server restarts.</p>
+    <p>Server information from <a href="https://vigrid.ovh/">vigrid.ovh</a></p>
     <server-list></server-list>
     <script>
       const m = new Monitor(
         document.querySelector('server-list'),
-        'http://localhost:5050/servers.json',
+        'https://vigrid.velvetcache.org/servers.json',
         "wss://vigrid.velvetcache.org/ws"
       );
     </script>
