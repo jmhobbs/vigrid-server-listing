@@ -88,11 +88,17 @@ func Test_parseServerName(t *testing.T) {
 			"EU",
 			"Vigrid | BattleRoyale #8 - Max Duo - Modded",
 		},
+		// When offline, they do a different format for some reason
+		{
+			"<span class=\"fi fi-eu\"></span> BattleRoyale #10",
+			"EU",
+			"BattleRoyale #10",
+		},
 	}
 
 	for _, test := range tests {
 		region, name, err := parseServerName(test.Input)
-		assert.Nil(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, test.Region, region)
 		assert.Equal(t, test.Name, name)
 	}

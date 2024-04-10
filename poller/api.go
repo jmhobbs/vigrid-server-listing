@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 )
@@ -70,12 +71,17 @@ func extractMaxPlayerCount(in string) int64 {
 	return maxPlayers
 }
 
-var nameParser *regexp.Regexp = regexp.MustCompile(`^.*\[(.{2})\] +(.*)`)
+var nameParser *regexp.Regexp = regexp.MustCompile(`^<span class="fi fi-(.{2})"></span> ((\[.{2}\])?(.*))`)
 
 func parseServerName(name string) (string, string, error) {
 	matches := nameParser.FindStringSubmatch(name)
-	if len(matches) != 3 {
+	if len(matches) != 5 {
 		return "", "", fmt.Errorf("could not parse server name: %s", name)
 	}
-	return matches[1], matches[2], nil
+	region := strings.ToUpper(matches[1])
+	// class on North America is CA (Canada?)
+	if region == "CA" {
+		region = "NA"
+	}
+	return region, strings.TrimSpace(matches[4]), nil
 }
