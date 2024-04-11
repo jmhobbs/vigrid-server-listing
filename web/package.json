@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "node dev-server.js"
+    "dev": "node scripts/dev.js",
+    "clean": "rm -rf dist/ && mkdir -p dist",
+    "build": "cp public/index.html dist/ && node scripts/build.js"
   },
   "author": "John Hobbs",
   "license": "MIT",

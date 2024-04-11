@@ -2,3 +2,4 @@ node_modules
 .DS_Store
 poller/bin
 poller/config
+web/dist

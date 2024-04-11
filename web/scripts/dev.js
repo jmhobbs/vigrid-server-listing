@@ -1,11 +1,9 @@
+// Default to local, proxied servers JSON to work around CORS
+process.env.SERVERS_JSON_URL = process.env.SERVERS_JSON_URL || '/servers.json';
+
 require('esbuild-server')
   .createServer(
-    {
-      bundle: true,
-      minify: true,
-      sourcemap: true,
-      entryPoints: ['src/app.js'],
-    },
+    require('./esbuild-options'),
     {
       static: 'public',
       injectLiveReload: true,

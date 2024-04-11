@@ -15,8 +15,8 @@ customElements.define('connection-monitor', ConnectionMonitor);
   const notifier = new SubscriptionNotifier(true, []);
 
   const monitor = new Monitor(
-    '/servers.json',
-    "wss://vigrid.velvetcache.org/ws"
+    process.env.SERVERS_JSON_URL || 'wss://vigrid.velvetcache.org/servers.json',
+    process.env.WEBSOCKET_URL || 'wss://vigrid.velvetcache.org/ws'
   );
 
   monitor.addEventListener('state-update', (evt) => {
