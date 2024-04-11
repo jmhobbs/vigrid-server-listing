@@ -4,9 +4,14 @@ template.innerHTML = `
   <div></div>
 `;
 
+// A UI element to show the connection state of the server monitor.
+// It should be updated when new messages arrive via lastUpdate, or
+// when the transport explicitly connects or disconnects with the
+// connected/disconnected methods.
 export default class ConnectionMonitor extends HTMLElement {
   constructor() {
     super();
+
     this._shadowRoot = this.attachShadow({ 'mode': 'open' });
     this._shadowRoot.appendChild(template.content.cloneNode(true));
     this.state = this._shadowRoot.querySelector('div');
@@ -33,10 +38,8 @@ export default class ConnectionMonitor extends HTMLElement {
 
   render() {
     const diff = Date.now() - this._lastUpdate;
-    if(diff > 30000) {
+    if(diff > 15000) {
       this.state.innerText = '🔴 Disconnected';
-    } else if (diff > 15000) {
-      this.state.innerText = '🟠 Reconnecting';
     } else {
       this.state.innerText = '🟢 Connected';
     }

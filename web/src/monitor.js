@@ -1,5 +1,8 @@
 import NchanSubscriber from 'nchan';
 
+// TODO: on reconnect, and perhaps periodically, resync state with servers.json
+
+// Handles updating server state from the servers.json and websocket connection.
 export default class Monitor extends EventTarget {
   constructor(serverJsonURL, wsURL) {
     super()
@@ -42,8 +45,6 @@ export default class Monitor extends EventTarget {
       console.error(err, desc);
       this.dispatchEvent(new CustomEvent('error', { detail: { err, desc } }));
     });
-
-    // TODO: on reconnect, and periodically, resync state with servers.json
 
     fetch(`${serverJsonURL.toString()}?_=${Date.now()}`)
       .then((response) => response.json())

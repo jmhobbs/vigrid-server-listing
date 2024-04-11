@@ -149,7 +149,19 @@ export default class ServerList extends HTMLElement {
       players.innerText = state[serverId].players;
       maxPlayers.innerText = `/${state[serverId].max_players}`;
       map.innerText = normalizeMapName(state[serverId].map);
-      uptime.innerText = state[serverId].uptime;
+
+      if(state[serverId].uptime_minutes) {
+        // format into time string
+        let hours = Math.floor(state[serverId].uptime_minutes / 60);
+        let minutes = state[serverId].uptime_minutes % 60;
+        if(hours > 0) {
+          uptime.innerText = `${hours}h ${minutes}m`;
+        } else {
+          uptime.innerText = `${minutes}m`;
+        }
+      } else {
+        uptime.innerText = state[serverId].uptime;
+      }
 
       row.appendChild(watch);
       row.appendChild(status);
