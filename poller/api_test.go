@@ -16,6 +16,26 @@ func Test_extractMaxPlayerCount(t *testing.T) {
 	assert.Equal(t, int64(0), maxPlayers)
 }
 
+func Test_parseUptime(t *testing.T) {
+	tests := []struct {
+		Input    string
+		Expected *int64
+	}{
+		{
+			"33 min",
+			ptrTo(int64(33)),
+		},
+		{
+			"offline",
+			nil,
+		},
+	}
+
+	for _, test := range tests {
+		assert.Equal(t, test.Expected, parseUptime(test.Input))
+	}
+}
+
 func Test_parseServerName(t *testing.T) {
 	// Pulled from API 2024-04-03
 	tests := []struct {

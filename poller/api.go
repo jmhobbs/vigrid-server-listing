@@ -48,17 +48,18 @@ func getCurrentState(ctx context.Context, endpoint string) (map[string]Server, e
 		}
 
 		state[server[0].(string)] = Server{
-			ID:         server[0].(string),
-			Name:       name,
-			Region:     region,
-			PartySize:  partySizeMapping[server[2].(string)],
-			Type:       ModdedServer,
-			Map:        server[4].(string),
-			State:      apiStateToState[server[5].(string)],
-			Players:    int64(server[6].(float64)),
-			MaxPlayers: extractMaxPlayerCount(server[7].(string)),
-			Uptime:     server[9].(string),
-			IP:         server[10].(string),
+			ID:            server[0].(string),
+			Name:          name,
+			Region:        region,
+			PartySize:     partySizeMapping[server[2].(string)],
+			Type:          ModdedServer,
+			Map:           server[4].(string),
+			State:         apiStateToState[server[5].(string)],
+			Players:       int64(server[6].(float64)),
+			MaxPlayers:    extractMaxPlayerCount(server[7].(string)),
+			Uptime:        server[9].(string),
+			UptimeMinutes: parseUptime(server[9].(string)),
+			IP:            server[10].(string),
 		}
 	}
 
@@ -84,4 +85,12 @@ func parseServerName(name string) (string, string, error) {
 		region = "NA"
 	}
 	return region, strings.TrimSpace(matches[4]), nil
+}
+
+func parseUptime(uptime string) *int64 {
+	var minutes int64
+	if n, _ := fmt.Sscanf(uptime, "%d min", &minutes); n == 1 {
+		return &minutes
+	}
+	return nil
 }
