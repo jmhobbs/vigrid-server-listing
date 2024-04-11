@@ -18,6 +18,14 @@ export default class ConnectionMonitor extends HTMLElement {
     setInterval(() => { this.render(); }, 1000);
   }
 
+  connected() {
+    this.lastUpdate = Date.now();
+  }
+
+  disconnected() {
+    this.lastUpdate = 0;
+  }
+
   set lastUpdate(value) {
     this._lastUpdate = value;
     this.render();

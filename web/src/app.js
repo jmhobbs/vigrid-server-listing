@@ -35,6 +35,18 @@ customElements.define('connection-monitor', ConnectionMonitor);
     connectionMonitor.lastUpdate = Date.now();
   });
 
+  monitor.addEventListener('connected', () => {
+    connectionMonitor.connected();
+  });
+
+  monitor.addEventListener('disconnected', () => {
+    connectionMonitor.disconnected();
+  });
+
+  monitor.addEventListener('error', () => {
+    connectionMonitor.disconnected();
+  });
+
   serverList.addEventListener('subscribe', (evt) => {
     console.log('subscribe', evt.detail);
     notifier.subscribe(evt.detail.id);
