@@ -39,6 +39,8 @@ func diffServers(oldState, newState map[string]Server) []UpdateMessage {
 				}
 				if server.UptimeMinutes != newServer.UptimeMinutes {
 					msg.UptimeMinutes = newServer.UptimeMinutes
+					// Don't send Uptime if we have a parsed version
+					msg.Uptime = nil
 				}
 				updates = append(updates, msg)
 			}
