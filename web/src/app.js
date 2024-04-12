@@ -40,7 +40,7 @@ customElements.define('connection-monitor', ConnectionMonitor);
     notifier.serverRestartHandler(evt.detail.id, evt.detail.name);
   });
 
-  monitor.addEventListener('heartbeat', (evt) => {
+  monitor.addEventListener('heartbeat', () => {
     connectionMonitor.lastUpdate = Date.now();
   });
 
@@ -50,6 +50,14 @@ customElements.define('connection-monitor', ConnectionMonitor);
 
   monitor.addEventListener('disconnected', () => {
     connectionMonitor.disconnected();
+  });
+
+  monitor.addEventListener('reconnecting', () => {
+    connectionMonitor.reconnecting();
+  });
+
+  monitor.addEventListener('reconnected', () => {
+    connectionMonitor.reconnected();
   });
 
   monitor.addEventListener('error', () => {

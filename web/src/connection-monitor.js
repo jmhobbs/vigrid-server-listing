@@ -16,6 +16,7 @@ export default class ConnectionMonitor extends HTMLElement {
     this._shadowRoot.appendChild(template.content.cloneNode(true));
     this.state = this._shadowRoot.querySelector('div');
     this._lastUpdate = 0;
+    this._reconnecting = false;
   }
 
   connectedCallback() {
@@ -31,12 +32,25 @@ export default class ConnectionMonitor extends HTMLElement {
     this.lastUpdate = 0;
   }
 
+  reconnecting() {
+    this._reconnecting = true;
+  }
+
+  reconnected() {
+    this._reconnecting = false;
+  }
+
   set lastUpdate(value) {
     this._lastUpdate = value;
     this.render();
   }
 
   render() {
+    if(this._reconnecting) {
+      this.state.innerText = '🟡 Reconnecting';
+      return;
+    }
+
     const diff = Date.now() - this._lastUpdate;
     if(diff > 15000) {
       this.state.innerText = '🔴 Disconnected';
