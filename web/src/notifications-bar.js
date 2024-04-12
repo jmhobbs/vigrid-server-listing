@@ -31,12 +31,10 @@ export default class NotificationsBar extends HTMLElement {
   }
 
   connectedCallback() {
-    console.log('NotificationsBar', Notification.permission);
     this.render(Notification.permission);
   }
 
   render(permission) {
-    console.log('render', permission);
     this._shadowRoot.querySelector('div').className = permission;
     switch(permission) {
       case 'granted':
