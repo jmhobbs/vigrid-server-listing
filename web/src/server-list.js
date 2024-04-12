@@ -61,12 +61,15 @@ template.innerHTML = `
     tbody tr :first-child, tbody tr :nth-child(2) {
       text-align: center;
     }
-    tbody tr :nth-child(5) {
+    tbody tr :nth-child(8) {
      text-align: right;
      padding-right: 0;
     }
-    tbody tr :nth-child(6) {
+    tbody tr :nth-child(9) {
       padding-left: 0;
+    }
+    tbody tr :nth-child(10) {
+      text-align: right;
     }
     tr.open {
       background-color: lightgreen;
@@ -79,7 +82,7 @@ template.innerHTML = `
     }
     tr.full {
       background-color: lightgoldenrodyellow;
-      }
+    }
   </style>
   <table class="server-list">
     <thead>
@@ -88,8 +91,10 @@ template.innerHTML = `
         <th>Status</th>
         <th>Region</th>
         <th>Name</th>
+        <th></th>
+        <th></th>
+        <th></th>
         <th colspan="2">Players</th>
-        <th>Map</th>
         <th>Uptime</th>
       </tr>
     </thead>
@@ -121,11 +126,13 @@ export default class ServerList extends HTMLElement {
       const row = document.createElement('tr');
       const watch = document.createElement('td');
       const status = document.createElement('td');
-      const name = document.createElement('td');
       const region = document.createElement('td');
+      const name = document.createElement('td');
+      const partySize = document.createElement('td');
+      const type = document.createElement('td');
+      const map = document.createElement('td');
       const players = document.createElement('td');
       const maxPlayers = document.createElement('td');
-      const map = document.createElement('td');
       const uptime = document.createElement('td');
 
       row.className = state[serverId].state;
@@ -144,8 +151,10 @@ export default class ServerList extends HTMLElement {
       })
 
       status.innerText = symbolForStatus(state[serverId].state);
-      name.innerText = state[serverId].name;
       region.innerText = state[serverId].region;
+      name.innerText = buildName(state[serverId]);
+      partySize.innerText = partySizeToString(state[serverId].party_size);
+      type.innerText = state[serverId].type;
       players.innerText = state[serverId].players;
       maxPlayers.innerText = `/${state[serverId].max_players}`;
       map.innerText = normalizeMapName(state[serverId].map);
@@ -167,9 +176,11 @@ export default class ServerList extends HTMLElement {
       row.appendChild(status);
       row.appendChild(region);
       row.appendChild(name);
+      row.appendChild(partySize);
+      row.appendChild(type);
+      row.appendChild(map);
       row.appendChild(players);
       row.appendChild(maxPlayers);
-      row.appendChild(map);
       row.appendChild(uptime);
 
       this._tbody.appendChild(row);
@@ -181,3 +192,18 @@ export default class ServerList extends HTMLElement {
   }
 }
 
+function buildName(server) {
+  return `BattleRoyale #${server.id}`
+}
+
+function partySizeToString(size) {
+  switch(size) {
+    case 1:
+      return 'Solo';
+    case 2:
+      return 'Duo';
+    case 3:
+      return 'Trio';
+  }
+  return size;
+}

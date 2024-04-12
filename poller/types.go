@@ -1,12 +1,5 @@
 package main
 
-type ServerType string
-
-const (
-	VanillaServer ServerType = "vanilla"
-	ModdedServer  ServerType = "modded"
-)
-
 type PartySize int
 
 const (
@@ -38,18 +31,18 @@ var apiStateToState map[string]State = map[string]State{
 }
 
 type Server struct {
-	ID            string     `json:"id"`
-	Name          string     `json:"name"`
-	Region        string     `json:"region"`
-	PartySize     PartySize  `json:"party_size"`
-	Type          ServerType `json:"type"`
-	Map           string     `json:"map"`
-	State         State      `json:"state"`
-	Players       int64      `json:"players"`
-	MaxPlayers    int64      `json:"max_players"`
-	Uptime        string     `json:"uptime"`
-	UptimeMinutes *int64     `json:"uptime_minutes,omitempty"`
-	IP            string     `json:"ip"`
+	ID            string    `json:"id"`
+	Name          string    `json:"name"`
+	Region        string    `json:"region"`
+	PartySize     PartySize `json:"party_size"`
+	Type          string    `json:"type"`
+	Map           string    `json:"map"`
+	State         State     `json:"state"`
+	Players       int64     `json:"players"`
+	MaxPlayers    int64     `json:"max_players"`
+	Uptime        string    `json:"uptime"`
+	UptimeMinutes *int64    `json:"uptime_minutes,omitempty"`
+	IP            string    `json:"ip"`
 }
 
 var RegionMapping map[string]string = map[string]string{

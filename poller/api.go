@@ -52,7 +52,7 @@ func getCurrentState(ctx context.Context, endpoint string) (map[string]Server, e
 			Name:          name,
 			Region:        region,
 			PartySize:     partySizeMapping[server[2].(string)],
-			Type:          ModdedServer,
+			Type:          server[3].(string),
 			Map:           server[4].(string),
 			State:         apiStateToState[server[5].(string)],
 			Players:       int64(server[6].(float64)),
