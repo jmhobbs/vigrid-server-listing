@@ -3,29 +3,26 @@
   <head>
     <meta charset="UTF-8">
     <title>VIGRID Battle Royale Servers</title>
-     <meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-connection-monitor {
-  margin: 1em;
-}
-* {
-  font-family: Futura, Helvetica, Arial, sans-serif; 
-}
-</style>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="./styles.css"/>
   </head>
   <body>
-    <notifications-bar></notifications-bar>
-    <h1>VIGRID Battle Royale Servers</h1>
-    <p>Click the bell 	🔕 → 🔔 to receive notifications when a server restarts.</p>
-    <p>Server information from <a href="https://vigrid.ovh/">vigrid.ovh</a></p>
-    <connection-monitor></connection-monitor>
-    <server-list></server-list>
-    <p>Bugs &amp; suggestions → <a href="https://github.com/jmhobbs/vigrid-server-listing/issues">GitHub</a></p>
-    <hr/>
-    <p><strong>Changelog</strong></p>
-    <p>2024-04-12: Subscriptions saved between page loads. Resync on disconnect.</p>
-    <p>2024-04-11: Added connection monitor, fixed bugs in server names.</p>
-    <p>2024-04-09: Launched with notifications for server restarts.</p>
-    <script src="app.js"></script>
+    <div id="app">
+      <notifications-bar></notifications-bar>
+      <h1>VIGRID Battle Royale Servers</h1>
+      <p>Click the bell 	🔕 → 🔔 to receive notifications when a server restarts.</p>
+      <p>Server information from <a href="https://vigrid.ovh/">vigrid.ovh</a></p>
+      <connection-monitor></connection-monitor>
+      <server-list></server-list>
+      <p>Bugs &amp; suggestions → <a href="https://github.com/jmhobbs/vigrid-server-listing/issues">GitHub</a></p>
+      <button id="dark-mode-toggle">Toggle Dark Mode</button>
+
+      <hr/>
+      <p><strong>Changelog</strong></p>
+      <p>2024-04-12: Subscriptions saved between page loads. Resync on disconnect.</p>
+      <p>2024-04-11: Added connection monitor, fixed bugs in server names.</p>
+      <p>2024-04-09: Launched with notifications for server restarts.</p>
+      <script src="app.js"></script>
+    </div>
   </body>
 </html>
