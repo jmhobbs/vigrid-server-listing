@@ -26,12 +26,11 @@ customElements.define('connection-monitor', ConnectionMonitor);
   monitor.addEventListener('state-update', (evt) => {
     // Merge our notifications flags into server state for rendering
     serverList.render(
-      Object.fromEntries(
-        Object.entries(evt.detail).map(([id, server]) => {
-          server.notifications = notifier.subscriptions.includes(server.id);
-          return [id, server];
-        })
-      )
+      Object.values(evt.detail).map((server) => {
+        server.idNum = parseInt(server.id)
+        server.notifications = notifier.subscriptions.includes(server.id);
+        return server;
+      })
     );
     connectionMonitor.lastUpdate = Date.now();
   });
@@ -71,5 +70,6 @@ customElements.define('connection-monitor', ConnectionMonitor);
 
   serverList.addEventListener('unsubscribe', (evt) => {
     notifier.unsubscribe(evt.detail.id);
+    Settings.setSubscriptions(notifier.subscriptions);
   });
 })();
