@@ -1,0 +1,35 @@
+:root,
+:root.light {
+  --body-background: white;
+  --body-text: black;
+}
+
+:root.dark {
+  --body-background: #282828;
+  --body-text: white;
+
+  a:link {color: lightskyblue; }
+  a:visited {color: #ad8bcd;}
+  a:hover {color: #ffffff;}
+  a:active {color: #ff4040;text-decoration: none;font-weight: normal;}
+}
+
+
+connection-monitor {
+  margin: 1em;
+}
+
+* {
+  font-family: Futura, Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--body-background);
+  color: var(--body-text);
+}
+
+#app {
+  max-width: 1280px;
+  text-align: center;
+  margin: auto;
+}

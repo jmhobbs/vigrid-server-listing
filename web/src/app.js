@@ -4,6 +4,7 @@ import Monitor from './monitor';
 import SubscriptionNotifier from './notifier';
 import ConnectionMonitor from './connection-monitor';
 import Settings from './settings';
+import createDarkMode from './dark-mode';
 
 customElements.define('notifications-bar', NotificationsBar);
 customElements.define('server-list', ServerList);
@@ -72,4 +73,6 @@ customElements.define('connection-monitor', ConnectionMonitor);
   serverList.addEventListener('unsubscribe', (evt) => {
     notifier.unsubscribe(evt.detail.id);
   });
+
+  createDarkMode();
 })();

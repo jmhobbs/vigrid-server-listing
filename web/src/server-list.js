@@ -44,6 +44,11 @@ const template = document.createElement('template');
 
 template.innerHTML = `
   <style>
+    .server-list {
+      margin: auto;
+      text-align: center;
+      color: black;
+    }
     .server-list tr :first-child {
         cursor: pointer;
     }
@@ -52,6 +57,7 @@ template.innerHTML = `
     }
     td, th {
       padding: 0.5em 1em;
+      text-align: left;
     }
     th {
       background: black;
