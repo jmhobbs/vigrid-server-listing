@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "VIGRID Battle Royale Server Notifications",
+  "description": "Get a notification when servers restart",
+  "version": "1.0",
+  "permissions": [
+    "notifications"
+  ],
+  "action": {
+    "default_popup": "hello.html",
+    "default_icon": "hello_extensions.png"
+  },
+  "background": {
+    "service_worker": "worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://vigrid.ovh/"
+      ],
+      "js": [
+        "content.js"
+      ]
+    }
+  ]
+}
