@@ -1,6 +1,6 @@
 function symbolForStatus(status) {
   let symbol = '❓';
-  switch(status) {
+  switch (status) {
     case 'open':
       symbol = '🟢';
       break;
@@ -23,7 +23,7 @@ function getSortFn(col, sortOrder) {
 }
 
 function normalizeMapName(map) {
-  switch(map) {
+  switch (map) {
     case 'chernarusplus':
       return 'Chernarus';
     case 'enoch':
@@ -39,7 +39,7 @@ function normalizeMapName(map) {
 }
 
 function notificationIcons(subbed) {
-  if(subbed) {
+  if (subbed) {
     return '🔔';
   }
   return '🔕';
@@ -52,7 +52,6 @@ template.innerHTML = `
     .server-list {
       margin: auto;
       text-align: center;
-      color: black;
     }
     .server-list tr :first-child {
         cursor: pointer;
@@ -82,10 +81,15 @@ template.innerHTML = `
     tbody tr :nth-child(10) {
       text-align: right;
     }
+    tr {
+      background-color: #282828;
+    }
     tr.open {
+      color: black;
       background-color: lightgreen;
       }
     tr.locked {
+      color: black;
       background-color: lightcoral;
       }
     tr.offline {
@@ -93,6 +97,15 @@ template.innerHTML = `
     }
     tr.full {
       background-color: lightgoldenrodyellow;
+    }
+    .select-styled {
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      font-size: 16px;
+      background-color: #444;
+      color: #ddd;
+      border: 0;
     }
   </style>
   <table class="server-list">
@@ -112,23 +125,42 @@ template.innerHTML = `
     <tbody></tbody>
   </table>`;
 
+const columns = [
+  { colName: 'watch', sortable: false, filterable: false },
+  { colName: 'status', sortable: false, filterable: false },
+  { colName: 'region', sortable: true, filterable: true },
+  { colName: 'name', sortable: true, filterable: false },
+  { colName: 'party_size', sortable: true, filterable: true },
+  { colName: 'type', sortable: true, filterable: true },
+  { colName: 'map', sortable: true, filterable: true },
+  { colName: 'players', sortable: true, filterable: false },
+  { colName: 'max_players', sortable: false, filterable: false },
+  { colName: 'uptime', sortable: false, filterable: false },
+];
+
+const sortableColumns = columns.filter(col => col.sortable === true).map(col => col.colName);
+
 export default class ServerList extends HTMLElement {
   _sortCol = 'idNum'
   _sortOrder = 'asc'
+  _filters = []
 
   constructor() {
     super();
     this._shadowRoot = this.attachShadow({ 'mode': 'open' });
     this._shadowRoot.appendChild(template.content.cloneNode(true));
     this._tbody = this._shadowRoot.querySelector('.server-list tbody');
+
+    columns.filter(col => col.filterable).forEach(column => {
+      this._filters.push({ col: column.colName, val: '' })
+    })
   }
 
-  render(unsortedState) {
-    const state = this.sortBy(unsortedState, this._sortCol);
+  render(unfilteredState) {
+    const filteredState = this.filterData(unfilteredState);
+    const state = this.sortBy(filteredState, this._sortCol);
 
     this._tbody.innerHTML = '';
-
-    const sortableColumns = ['region', 'name', 'party_size', 'type', 'map', 'players'];
 
     const resetAllSortOrders = () => {
       sortableColumns.forEach(colName => {
@@ -156,7 +188,7 @@ export default class ServerList extends HTMLElement {
 
         const sortCol = colName === 'name' ? 'idNum' : colName;
 
-        
+
         if (this._sortCol === sortCol && this._sortOrder === 'asc') {
           this._sortOrder = 'desc';
         } else {
@@ -171,17 +203,60 @@ export default class ServerList extends HTMLElement {
       headerElem.parentNode.replaceChild(newElem, headerElem);
     })
 
+    const filterRow = document.createElement('tr');
+    columns.forEach(column => {
+      const filterContainer = document.createElement('td');
+
+      if (column.filterable === false) {
+        filterRow.appendChild(filterContainer);
+        return;
+      }
+
+      const select = document.createElement('select');
+      select.classList.add('select-styled');
+      select.appendChild(document.createElement('option'));
+      select.value = this._filters.filter(f => f.col === column.colName)[0].val;
+
+      const allColumnValues = unfilteredState.map(s => s[column.colName]);
+      const uniqueColumnValues = [...new Set(allColumnValues)];
+
+      uniqueColumnValues.forEach(filterableValue => {
+        const option = document.createElement('option');
+        option.innerText = filterableValue;
+        if (this._filters.filter(f => f.col === column.colName)[0].val === filterableValue.toString()) {
+          option.selected = 'selected';
+        }
+        select.appendChild(option);
+      });
+
+      select.addEventListener('change', () => {
+        this.addFilter({ col: column.colName, val: select.value });
+        this.render(unfilteredState);
+      });
+
+      filterContainer.appendChild(select);
+      filterRow.appendChild(filterContainer);
+    });
+    this._tbody.appendChild(filterRow);
+
     if (state.length === 0) {
       const row = document.createElement('tr');
       const loading = document.createElement('td');
-      loading.innerText = 'Loading...';
-      loading.setAttribute('colspan', 6);
+
+      if (unfilteredState.length > 0) {
+        loading.innerText = 'No servers found. Try widening your criteria.'
+      } else {
+        loading.innerText = 'Loading...';
+      }
+
+      loading.setAttribute('colspan', columns.length);
       row.appendChild(loading);
       this._tbody.appendChild(row);
+      return;
     }
 
     // flush it and re-build
-    for(let serverId in state) {
+    for (let serverId in state) {
       const row = document.createElement('tr');
       const watch = document.createElement('td');
       const status = document.createElement('td');
@@ -199,7 +274,7 @@ export default class ServerList extends HTMLElement {
       watch.innerText = notificationIcons(state[serverId].notifications);
       watch.addEventListener('click', () => {
         let event = 'subscribe';
-        if(state[serverId].notifications) {
+        if (state[serverId].notifications) {
           event = 'unsubscribe';
         }
         state[serverId].notifications = !state[serverId].notifications;
@@ -218,11 +293,11 @@ export default class ServerList extends HTMLElement {
       maxPlayers.innerText = `/${state[serverId].max_players}`;
       map.innerText = normalizeMapName(state[serverId].map);
 
-      if(state[serverId].uptime_minutes) {
+      if (state[serverId].uptime_minutes) {
         // format into time string
         let hours = Math.floor(state[serverId].uptime_minutes / 60);
         let minutes = state[serverId].uptime_minutes % 60;
-        if(hours > 0) {
+        if (hours > 0) {
           uptime.innerText = `${hours}h ${minutes}m`;
         } else {
           uptime.innerText = `${minutes}m`;
@@ -251,6 +326,26 @@ export default class ServerList extends HTMLElement {
     return newState;
   }
 
+  addFilter(newFilter) {
+    const existingFilterForCol = this._filters.map(f => f.col).indexOf(newFilter.col)
+    if (existingFilterForCol !== -1) {
+      this._filters.splice(existingFilterForCol, 1);
+    }
+
+    this._filters.push({ col: newFilter.col, val: newFilter.val });
+  }
+
+  filterData(state) {
+    let filteredState = state;
+    this._filters.forEach(f => {
+      console.log(f, filteredState.map(s => s[f.col]))
+      if (f.val === '') return;
+
+      filteredState = filteredState.filter(s => s[f.col].toString() === f.val);
+    });
+    return filteredState;
+  }
+
   connectedCallback() {
     this.render([]);
   }
@@ -261,7 +356,7 @@ function buildName(server) {
 }
 
 function partySizeToString(size) {
-  switch(size) {
+  switch (size) {
     case 1:
       return 'Solo';
     case 2:
