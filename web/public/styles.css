@@ -33,3 +33,17 @@ body {
   text-align: center;
   margin: auto;
 }
+
+#changelog {
+  text-align: left;
+}
+
+#changelog p {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+  margin: 0.25em 0;
+}
+
+#made-by img {
+  position: relative;
+  top: 5px;
+}
