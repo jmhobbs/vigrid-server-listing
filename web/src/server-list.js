@@ -18,8 +18,8 @@ function symbolForStatus(status) {
 }
 
 function getSortFn(col, sortOrder) {
-  if (sortOrder === 'asc') return (a, b) => a[col] > b[col]
-  return (a, b) => b[col] > a[col]
+  if (sortOrder === 'asc') return (a, b) => a[col] > b[col] ? 1 : -1;
+  return (a, b) => b[col] > a[col] ? 1 : -1;
 }
 
 function normalizeMapName(map) {
