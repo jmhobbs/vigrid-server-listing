@@ -17,6 +17,11 @@ function symbolForStatus(status) {
   return symbol
 }
 
+function getSortFn(col, sortOrder) {
+  if (sortOrder === 'asc') return (a, b) => a[col] > b[col] ? 1 : -1;
+  return (a, b) => b[col] > a[col] ? 1 : -1;
+}
+
 function normalizeMapName(map) {
   switch(map) {
     case 'chernarusplus':
@@ -95,12 +100,12 @@ template.innerHTML = `
       <tr>
         <th></th>
         <th>Status</th>
-        <th>Region</th>
-        <th>Name</th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th colspan="2">Players</th>
+        <th id='region-header'>Region ▼</th>
+        <th id='name-header'>Name ▼</th>
+        <th id='party_size-header'>▼</th>
+        <th id='type-header'>▼</th>
+        <th id='map-header'>▼</th>
+        <th id='players-header' colspan="2">Players ▼</th>
         <th>Uptime</th>
       </tr>
     </thead>
@@ -108,6 +113,9 @@ template.innerHTML = `
   </table>`;
 
 export default class ServerList extends HTMLElement {
+  _sortCol = 'idNum'
+  _sortOrder = 'asc'
+
   constructor() {
     super();
     this._shadowRoot = this.attachShadow({ 'mode': 'open' });
@@ -115,10 +123,55 @@ export default class ServerList extends HTMLElement {
     this._tbody = this._shadowRoot.querySelector('.server-list tbody');
   }
 
-  render(state) {
+  render(unsortedState) {
+    const state = this.sortBy(unsortedState, this._sortCol);
+
     this._tbody.innerHTML = '';
 
-    if(!state) {
+    const sortableColumns = ['region', 'name', 'party_size', 'type', 'map', 'players'];
+
+    const resetAllSortOrders = () => {
+      sortableColumns.forEach(colName => {
+        const headerElem = this._shadowRoot.querySelector(`#${colName}-header`);
+        const currentText = headerElem.innerText;
+        if (currentText.includes('▲')) headerElem.innerText = currentText.replace('▲', '▼')
+      });
+    }
+
+    sortableColumns.forEach(colName => {
+      const headerElem = this._shadowRoot.querySelector(`#${colName}-header`);
+
+      //clone the elem to remove previous click listener
+      const newElem = headerElem.cloneNode(true);
+
+      newElem.addEventListener('click', () => {
+        const currentText = newElem.innerText;
+        resetAllSortOrders();
+
+        if (currentText.includes('▼')) {
+          newElem.innerText = currentText.replace('▼', '▲');
+        } else {
+          newElem.innerText = currentText.replace('▲', '▼');
+        }
+
+        const sortCol = colName === 'name' ? 'idNum' : colName;
+
+        
+        if (this._sortCol === sortCol && this._sortOrder === 'asc') {
+          this._sortOrder = 'desc';
+        } else {
+          this._sortOrder = 'asc';
+          this._sortCol = sortCol;
+        }
+
+        const newState = this.sortBy(state);
+        this.render(newState);
+      });
+
+      headerElem.parentNode.replaceChild(newElem, headerElem);
+    })
+
+    if (state.length === 0) {
       const row = document.createElement('tr');
       const loading = document.createElement('td');
       loading.innerText = 'Loading...';
@@ -193,8 +246,13 @@ export default class ServerList extends HTMLElement {
     }
   }
 
+  sortBy(state) {
+    const newState = state.sort(getSortFn(this._sortCol, this._sortOrder));
+    return newState;
+  }
+
   connectedCallback() {
-    this.render(null);
+    this.render([]);
   }
 }
 
