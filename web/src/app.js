@@ -1,19 +1,22 @@
+import ConnectionMonitor from './connection-monitor';
+import Monitor from './monitor';
+import NotificationToggle from './notification-toggle';
 import NotificationsBar from './notifications-bar';
 import ServerList from './server-list';
-import Monitor from './monitor';
-import SubscriptionNotifier from './notifier';
-import ConnectionMonitor from './connection-monitor';
 import Settings from './settings';
+import SubscriptionNotifier from './notifier';
 import createDarkMode from './dark-mode';
 import stateSorted from './sort';
 
+customElements.define('connection-monitor', ConnectionMonitor);
+customElements.define('notification-toggle', NotificationToggle);
 customElements.define('notifications-bar', NotificationsBar);
 customElements.define('server-list', ServerList);
-customElements.define('connection-monitor', ConnectionMonitor);
 
 (() => {
   const serverList = document.querySelector('server-list');
   const connectionMonitor = document.querySelector('connection-monitor');
+  const notificationToggle = document.querySelector('notification-toggle');
 
   const notifier = new SubscriptionNotifier(
     Settings.getNotificationsEnabled(),
@@ -83,6 +86,17 @@ customElements.define('connection-monitor', ConnectionMonitor);
     sortField = evt.detail.field;
     sortDirection = evt.detail.direction;
     serverList.render(stateSorted(stateWithNotifications(monitor.state), sortField, sortDirection));
+  });
+
+  notificationToggle.state = Settings.getNotificationsEnabled();
+
+  notificationToggle.addEventListener('toggle', (evt) => {
+    if(evt.detail) {
+      notifier.enable();
+    } else {
+      notifier.disable();
+    }
+    Settings.setNotificationsEnabled(evt.detail);
   });
 
   createDarkMode();

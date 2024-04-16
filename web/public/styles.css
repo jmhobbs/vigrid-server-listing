@@ -47,3 +47,7 @@ body {
   position: relative;
   top: 5px;
 }
+
+connection-monitor, notification-toggle {
+  display: inline-block;
+}
