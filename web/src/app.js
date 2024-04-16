@@ -5,6 +5,7 @@ import SubscriptionNotifier from './notifier';
 import ConnectionMonitor from './connection-monitor';
 import Settings from './settings';
 import createDarkMode from './dark-mode';
+import stateSorted from './sort';
 
 customElements.define('notifications-bar', NotificationsBar);
 customElements.define('server-list', ServerList);
@@ -24,15 +25,19 @@ customElements.define('connection-monitor', ConnectionMonitor);
     process.env.WEBSOCKET_URL || 'wss://vigrid.velvetcache.org/ws'
   );
 
+  let sortField = 'state';
+  let sortDirection = 'asc';
+
+  // Merge our notifications flags into server state for rendering
+  const stateWithNotifications = (state) => {
+    return Object.fromEntries(Object.entries(state).map(([id, server]) => {
+      server.notifications = notifier.subscriptions.includes(server.id);
+      return [id, server];
+    }));
+  }
+
   monitor.addEventListener('state-update', (evt) => {
-    // Merge our notifications flags into server state for rendering
-    serverList.render(
-      Object.values(evt.detail).map((server) => {
-        server.idNum = parseInt(server.id)
-        server.notifications = notifier.subscriptions.includes(server.id);
-        return server;
-      })
-    );
+    serverList.render(stateSorted(stateWithNotifications(evt.detail), sortField, sortDirection));
     connectionMonitor.lastUpdate = Date.now();
   });
 
@@ -72,6 +77,12 @@ customElements.define('connection-monitor', ConnectionMonitor);
   serverList.addEventListener('unsubscribe', (evt) => {
     notifier.unsubscribe(evt.detail.id);
     Settings.setSubscriptions(notifier.subscriptions);
+  });
+
+  serverList.addEventListener('sort', (evt) => {
+    sortField = evt.detail.field;
+    sortDirection = evt.detail.direction;
+    serverList.render(stateSorted(stateWithNotifications(monitor.state), sortField, sortDirection));
   });
 
   createDarkMode();

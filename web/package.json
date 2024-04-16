@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test": "ava",
     "dev": "node scripts/dev.js",
     "clean": "rm -rf dist/ && mkdir -p dist",
     "build": "cp public/* dist/ && node scripts/build.js"
@@ -11,8 +12,15 @@
   "author": "John Hobbs",
   "license": "MIT",
   "devDependencies": {
+    "@esbuild-kit/cjs-loader": "^2.4.4",
+    "ava": "^6.1.2",
     "esbuild": "^0.20.2",
     "esbuild-server": "^0.3.0",
     "nchan": "^1.0.10"
+  },
+  "ava": {
+    "require": [
+      "@esbuild-kit/cjs-loader"
+    ]
   }
 }

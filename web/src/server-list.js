@@ -94,18 +94,30 @@ template.innerHTML = `
     tr.full {
       background-color: lightgoldenrodyellow;
     }
+    th.sortable {
+      cursor: pointer;
+    }
+    th.sortable::after {
+      content: ' ●';'
+    }
+    th.sortable.asc::after {
+      content: ' ▲';
+    }
+    th.sortable.desc::after {
+      content: ' ▼';
+    }
   </style>
   <table class="server-list">
     <thead>
       <tr>
         <th></th>
-        <th>Status</th>
-        <th id='region-header'>Region ▼</th>
-        <th id='name-header'>Name ▼</th>
-        <th id='party_size-header'>▼</th>
-        <th id='type-header'>▼</th>
-        <th id='map-header'>▼</th>
-        <th id='players-header' colspan="2">Players ▼</th>
+        <th class="sortable asc" data-sort="state">Status</th>
+        <th class="sortable" data-sort="region">Region</th>
+        <th class="sortable" data-sort="name"'>Name</th>
+        <th class="sortable" data-sort="party_size"></th>
+        <th class="sortable" data-sort="type"></th>
+        <th class="sortable" data-sort="map"></th>
+        <th class="sortable" data-sort="players" colspan="2">Players</th>
         <th>Uptime</th>
       </tr>
     </thead>
@@ -113,63 +125,42 @@ template.innerHTML = `
   </table>`;
 
 export default class ServerList extends HTMLElement {
-  _sortCol = 'idNum'
-  _sortOrder = 'asc'
-
   constructor() {
     super();
     this._shadowRoot = this.attachShadow({ 'mode': 'open' });
     this._shadowRoot.appendChild(template.content.cloneNode(true));
     this._tbody = this._shadowRoot.querySelector('.server-list tbody');
+
+    this._sortables = this._shadowRoot.querySelectorAll('thead th.sortable');
+    this._sortables.forEach(sortable => {
+      let direction = 'none';
+
+      sortable.addEventListener('click', () => {
+        if(sortable.classList.contains('asc')) {
+          sortable.classList.remove('asc');
+          sortable.classList.add('desc');
+          direction = 'desc';
+        } else if(sortable.classList.contains('desc')) {
+          sortable.classList.remove('desc');
+          direction = 'none';
+        }
+        else {
+          this._sortables.forEach(sortable => {
+            sortable.classList.remove('asc');
+            sortable.classList.remove('desc');
+          });
+          sortable.classList.add('asc');
+          direction = 'asc';
+        }
+        this.dispatchEvent(new CustomEvent('sort', {
+          detail: { direction, field: sortable.dataset.sort }
+        }));
+      });
+    });
   }
 
-  render(unsortedState) {
-    const state = this.sortBy(unsortedState, this._sortCol);
-
+  render(state) {
     this._tbody.innerHTML = '';
-
-    const sortableColumns = ['region', 'name', 'party_size', 'type', 'map', 'players'];
-
-    const resetAllSortOrders = () => {
-      sortableColumns.forEach(colName => {
-        const headerElem = this._shadowRoot.querySelector(`#${colName}-header`);
-        const currentText = headerElem.innerText;
-        if (currentText.includes('▲')) headerElem.innerText = currentText.replace('▲', '▼')
-      });
-    }
-
-    sortableColumns.forEach(colName => {
-      const headerElem = this._shadowRoot.querySelector(`#${colName}-header`);
-
-      //clone the elem to remove previous click listener
-      const newElem = headerElem.cloneNode(true);
-
-      newElem.addEventListener('click', () => {
-        const currentText = newElem.innerText;
-        resetAllSortOrders();
-
-        if (currentText.includes('▼')) {
-          newElem.innerText = currentText.replace('▼', '▲');
-        } else {
-          newElem.innerText = currentText.replace('▲', '▼');
-        }
-
-        const sortCol = colName === 'name' ? 'idNum' : colName;
-
-        
-        if (this._sortCol === sortCol && this._sortOrder === 'asc') {
-          this._sortOrder = 'desc';
-        } else {
-          this._sortOrder = 'asc';
-          this._sortCol = sortCol;
-        }
-
-        const newState = this.sortBy(state);
-        this.render(newState);
-      });
-
-      headerElem.parentNode.replaceChild(newElem, headerElem);
-    })
 
     if (state.length === 0) {
       const row = document.createElement('tr');
@@ -181,7 +172,9 @@ export default class ServerList extends HTMLElement {
     }
 
     // flush it and re-build
-    for(let serverId in state) {
+    for(var i = 0; i < state.length; i++) {
+      const server = state[i];
+
       const row = document.createElement('tr');
       const watch = document.createElement('td');
       const status = document.createElement('td');
@@ -194,41 +187,41 @@ export default class ServerList extends HTMLElement {
       const maxPlayers = document.createElement('td');
       const uptime = document.createElement('td');
 
-      row.className = state[serverId].state;
+      row.className = server.state;
 
-      watch.innerText = notificationIcons(state[serverId].notifications);
+      watch.innerText = notificationIcons(server.notifications);
       watch.addEventListener('click', () => {
         let event = 'subscribe';
-        if(state[serverId].notifications) {
+        if(server.notifications) {
           event = 'unsubscribe';
         }
-        state[serverId].notifications = !state[serverId].notifications;
-        watch.innerText = notificationIcons(state[serverId].notifications);
+        server.notifications = !server.notifications;
+        watch.innerText = notificationIcons(server.notifications);
         this.dispatchEvent(new CustomEvent(event, {
-          detail: { id: serverId }
+          detail: { id: server.id }
         }));
       })
 
-      status.innerText = symbolForStatus(state[serverId].state);
-      region.innerText = state[serverId].region;
-      name.innerText = buildName(state[serverId]);
-      partySize.innerText = partySizeToString(state[serverId].party_size);
-      type.innerText = state[serverId].type;
-      players.innerText = state[serverId].players;
-      maxPlayers.innerText = `/${state[serverId].max_players}`;
-      map.innerText = normalizeMapName(state[serverId].map);
+      status.innerText = symbolForStatus(server.state);
+      region.innerText = server.region;
+      name.innerText = buildName(server);
+      partySize.innerText = partySizeToString(server.party_size);
+      type.innerText = server.type;
+      players.innerText = server.players;
+      maxPlayers.innerText = `/${server.max_players}`;
+      map.innerText = normalizeMapName(server.map);
 
-      if(state[serverId].uptime_minutes) {
+      if(server.uptime_minutes) {
         // format into time string
-        let hours = Math.floor(state[serverId].uptime_minutes / 60);
-        let minutes = state[serverId].uptime_minutes % 60;
+        let hours = Math.floor(server.uptime_minutes / 60);
+        let minutes = server.uptime_minutes % 60;
         if(hours > 0) {
           uptime.innerText = `${hours}h ${minutes}m`;
         } else {
           uptime.innerText = `${minutes}m`;
         }
       } else {
-        uptime.innerText = state[serverId].uptime;
+        uptime.innerText = server.uptime;
       }
 
       row.appendChild(watch);
