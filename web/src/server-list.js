@@ -111,6 +111,17 @@ template.innerHTML = `
       background: #ccc;
       cursor: default !important;
     }
+    select {
+      cursor: pointer;
+      display: inline-block;
+      position: relative;
+      font-size: 0.75em;
+      font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
+      background-color: #444;
+      color: #ddd;
+      border: 0;
+      padding: 2px 5px;
+    }
   </style>
   <table class="server-list">
     <thead>
