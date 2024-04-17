@@ -7,14 +7,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: poller/
     steps:
       - shell: bash
-      env:
-        USERNAME: ${{ secrets.DeployUsername }}
-        PASSWORD: ${{ secrets.DeployPassword }}
-      run: |
-        curl --user "$USERNAME:$PASSWORD" https://vigrid.velvetcache.org/deploy/new
+        env:
+          USERNAME: ${{ secrets.DeployUsername }}
+          PASSWORD: ${{ secrets.DeployPassword }}
+        run: |
+          curl --user "$USERNAME:$PASSWORD" https://vigrid.velvetcache.org/deploy/new
 
