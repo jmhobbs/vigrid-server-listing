@@ -17,11 +17,6 @@ function symbolForStatus(status) {
   return symbol
 }
 
-function getSortFn(col, sortOrder) {
-  if (sortOrder === 'asc') return (a, b) => a[col] > b[col] ? 1 : -1;
-  return (a, b) => b[col] > a[col] ? 1 : -1;
-}
-
 function normalizeMapName(map) {
   switch(map) {
     case 'chernarusplus':
@@ -37,6 +32,12 @@ function normalizeMapName(map) {
   }
   return map;
 }
+
+const presentationForField = {
+  state: symbolForStatus,
+  map: normalizeMapName,
+  party_size: partySizeToString,
+};
 
 function notificationIcons(subbed) {
   if(subbed) {
@@ -106,6 +107,10 @@ template.innerHTML = `
     th.sortable.desc::after {
       content: ' ▼';
     }
+    tr.hidden-count td, tr.loading td {
+      background: #ccc;
+      cursor: default !important;
+    }
   </style>
   <table class="server-list">
     <thead>
@@ -114,11 +119,22 @@ template.innerHTML = `
         <th class="sortable asc" data-sort="state">Status</th>
         <th class="sortable" data-sort="region">Region</th>
         <th class="sortable" data-sort="name"'>Name</th>
-        <th class="sortable" data-sort="party_size"></th>
-        <th class="sortable" data-sort="type"></th>
-        <th class="sortable" data-sort="map"></th>
+        <th class="sortable" data-sort="party_size">Party Size</th>
+        <th class="sortable" data-sort="type">Modded</th>
+        <th class="sortable" data-sort="map">Map</th>
         <th class="sortable" data-sort="players" colspan="2">Players</th>
         <th>Uptime</th>
+      </tr>
+      <tr class="filters">
+        <th></th>
+        <th><select name="state"><option value="">---</option></select></th>
+        <th><select name="region"><option value="">---</option></select></th>
+        <th></th>
+        <th><select name="party_size"><option value="">---</option></select></th>
+        <th><select name="type"><option value="">---</option></select></th>
+        <th><select name="map"><option value="">---</option></select></th>
+        <th colspan="2"></th>
+        <th></th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -157,18 +173,50 @@ export default class ServerList extends HTMLElement {
         }));
       });
     });
+
+    this.filterables = {};
+    this._shadowRoot.querySelectorAll('th select').forEach((select) => {
+      this.filterables[select.name] = new Set();
+      select.addEventListener('change', () => {
+        this.dispatchEvent(new CustomEvent('filter', { detail: { name: select.name, value: select.value } }));
+      });
+    });
   }
 
-  render(state) {
+  updateFilterables(state) {
+    this._shadowRoot.querySelectorAll('th select').forEach((select) => {
+      const newFilterables = new Set();
+      state.forEach((server) => {
+        newFilterables.add(server[select.name]);
+      });
+
+      const newValues = newFilterables.difference(this.filterables[select.name]);
+      if(newValues.size > 0 ){
+        this.filterables[select.name] = this.filterables[select.name].union(newValues);
+        newValues.values().forEach((value) => {
+          const option = document.createElement('option');
+          option.innerText = presentationForField[select.name] ? presentationForField[select.name](value) : value;
+          option.value = value;
+          select.appendChild(option);
+        });
+      }
+    });
+  }
+
+  render(state, filteredCount) {
+    this.updateFilterables(state);
+
     this._tbody.innerHTML = '';
 
-    if (state.length === 0) {
+    if (state.length === 0 && filteredCount === 0) {
       const row = document.createElement('tr');
       const loading = document.createElement('td');
       loading.innerText = 'Loading...';
-      loading.setAttribute('colspan', 6);
+      loading.setAttribute('colspan', 10);
       row.appendChild(loading);
+      row.className = 'loading';
       this._tbody.appendChild(row);
+      return;
     }
 
     // flush it and re-build
@@ -237,11 +285,16 @@ export default class ServerList extends HTMLElement {
 
       this._tbody.appendChild(row);
     }
-  }
 
-  sortBy(state) {
-    const newState = state.sort(getSortFn(this._sortCol, this._sortOrder));
-    return newState;
+    if(filteredCount > 0) {
+      const row = document.createElement('tr');
+      const column = document.createElement('td');
+      column.innerText = `${filteredCount} Servers Hidden By Filters`;
+      column.setAttribute('colspan', 10);
+      row.appendChild(column);
+      row.classList.add('hidden-count');
+      this._tbody.appendChild(row);
+    }
   }
 
   connectedCallback() {

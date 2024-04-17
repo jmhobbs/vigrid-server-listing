@@ -6,6 +6,7 @@ import ServerList from './server-list';
 import Settings from './settings';
 import SubscriptionNotifier from './notifier';
 import createDarkMode from './dark-mode';
+import filteredState from './filter';
 import stateSorted from './sort';
 
 customElements.define('connection-monitor', ConnectionMonitor);
@@ -31,6 +32,8 @@ customElements.define('server-list', ServerList);
   let sortField = 'state';
   let sortDirection = 'asc';
 
+  let filters = {};
+
   // Merge our notifications flags into server state for rendering
   const stateWithNotifications = (state) => {
     return Object.fromEntries(Object.entries(state).map(([id, server]) => {
@@ -39,8 +42,14 @@ customElements.define('server-list', ServerList);
     }));
   }
 
-  monitor.addEventListener('state-update', (evt) => {
-    serverList.render(stateSorted(stateWithNotifications(evt.detail), sortField, sortDirection));
+  const updateServerList = () => {
+    const sortedState = stateSorted(stateWithNotifications(monitor.state), sortField, sortDirection);
+    const filtered = filteredState(sortedState, filters);
+    serverList.render(filtered, sortedState.length - filtered.length);
+  }
+
+  monitor.addEventListener('state-update', () => {
+    updateServerList();
     connectionMonitor.lastUpdate = Date.now();
   });
 
@@ -85,7 +94,16 @@ customElements.define('server-list', ServerList);
   serverList.addEventListener('sort', (evt) => {
     sortField = evt.detail.field;
     sortDirection = evt.detail.direction;
-    serverList.render(stateSorted(stateWithNotifications(monitor.state), sortField, sortDirection));
+    updateServerList();
+  });
+
+  serverList.addEventListener('filter', (evt) => {
+    if(evt.detail.value === "") {
+      delete filters[evt.detail.name];
+    } else {
+      filters[evt.detail.name] = evt.detail.value;
+    }
+    updateServerList();
   });
 
   notificationToggle.state = Settings.getNotificationsEnabled();
