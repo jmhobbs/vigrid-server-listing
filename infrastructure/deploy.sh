@@ -4,8 +4,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-echo "content-type: text/plain\r\n"
-
 DEPLOY_EPOCH=$(date +%Y_%m_%d_%H_%M_%S)
 
 echo "--[ Starting deploy ]----------------------------------------------------------"
@@ -59,3 +57,4 @@ echo
 
 # TODO: Clean up old versions
 
+echo "======== Complete! ========"
