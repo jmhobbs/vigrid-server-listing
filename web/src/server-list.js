@@ -1,3 +1,6 @@
+import difference from 'set.prototype.difference'
+import union from 'set.prototype.union'
+
 function symbolForStatus(status) {
   let symbol = '❓';
   switch(status) {
@@ -201,10 +204,10 @@ export default class ServerList extends HTMLElement {
         newFilterables.add(server[select.name]);
       });
 
-      const newValues = newFilterables.difference(this.filterables[select.name]);
+      const newValues = difference(newFilterables, this.filterables[select.name]);
       if(newValues.size > 0 ){
-        this.filterables[select.name] = this.filterables[select.name].union(newValues);
-        newValues.values().forEach((value) => {
+        this.filterables[select.name] = union(this.filterables[select.name], newValues);
+        newValues.forEach((value) => {
           const option = document.createElement('option');
           option.innerText = presentationForField[select.name] ? presentationForField[select.name](value) : value;
           option.value = value;
